@@ -47,11 +47,14 @@ function App() {
 
     setIsAnalyzing(true);
     try {
+      console.log('Starting analysis...');
       const extractedInsights = await extractInsights(apiKey, transcript);
+      console.log('Extracted insights:', extractedInsights);
       setInsights(extractedInsights);
       setPosts([]);
     } catch (error) {
-      alert(`Error analyzing transcript: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Analysis error:', error);
+      alert(`Error analyzing transcript: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsAnalyzing(false);
     }

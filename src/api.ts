@@ -67,6 +67,8 @@ Return ONLY the post text, nothing else. No quotes, no markdown, no explanation.
 };
 
 const callOpenAI = async (apiKey: string, prompt: string, temperature: number = 0.7): Promise<string> => {
+  console.log('Calling OpenAI API...');
+
   const response = await fetch(OPENAI_API_URL, {
     method: 'POST',
     headers: {
@@ -83,21 +85,30 @@ const callOpenAI = async (apiKey: string, prompt: string, temperature: number = 
     })
   });
 
+  console.log('Response status:', response.status);
+
   if (!response.ok) {
     const error = await response.json();
+    console.error('API error response:', error);
     throw new Error(error.error?.message || 'API request failed');
   }
 
   const data = await response.json();
+  console.log('API response received');
   return data.choices[0].message.content;
 };
 
 export const extractInsights = async (apiKey: string, transcript: string): Promise<Insight[]> => {
+  console.log('Extracting insights from transcript...');
   const prompt = getInsightExtractionPrompt(transcript);
   const response = await callOpenAI(apiKey, prompt, 0.7);
 
+  console.log('Raw response:', response);
   const cleaned = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  console.log('Cleaned response:', cleaned);
+
   const insights = JSON.parse(cleaned);
+  console.log('Parsed insights:', insights);
 
   return insights.map((insight: Insight) => ({
     ...insight,
