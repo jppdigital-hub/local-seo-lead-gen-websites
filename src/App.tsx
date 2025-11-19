@@ -35,19 +35,23 @@ function App() {
   }, [insights, posts]);
 
   const handleAnalyze = async () => {
+    console.log('handleAnalyze called!', { apiKey: apiKey ? 'present' : 'missing', transcript: transcript.slice(0, 50) });
+
     if (!apiKey) {
+      console.log('No API key');
       alert('Please add your OpenAI API key first');
       return;
     }
 
     if (!transcript.trim()) {
+      console.log('No transcript');
       alert('Please paste a transcript first');
       return;
     }
 
+    console.log('Starting analysis...');
     setIsAnalyzing(true);
     try {
-      console.log('Starting analysis...');
       const extractedInsights = await extractInsights(apiKey, transcript);
       console.log('Extracted insights:', extractedInsights);
       setInsights(extractedInsights);
