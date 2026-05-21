@@ -11,28 +11,28 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.domain),
   title: {
-    default: `${siteConfig.niche} ${siteConfig.city} ${siteConfig.state} | ${siteConfig.businessName}`,
-    template: `%s | ${siteConfig.businessName}`,
+    default: `${siteConfig.niche} ${siteConfig.city} ${siteConfig.state} | ${siteConfig.displayName}`,
+    template: `%s | ${siteConfig.displayName}`,
   },
   description: siteConfig.tagline,
   keywords: [
     `${siteConfig.niche.toLowerCase()} ${siteConfig.city}`,
     `${siteConfig.niche.toLowerCase()} ${siteConfig.city} ${siteConfig.state}`,
     `${siteConfig.niche.toLowerCase()} near me`,
-    `cheap ${siteConfig.niche.toLowerCase()} ${siteConfig.city}`,
-    `same day ${siteConfig.niche.toLowerCase()} ${siteConfig.city}`,
+    `find ${siteConfig.niche.toLowerCase()} ${siteConfig.city}`,
+    `${siteConfig.niche.toLowerCase()} ${siteConfig.city} quote`,
   ],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: siteConfig.domain,
-    siteName: siteConfig.businessName,
-    title: `${siteConfig.niche} ${siteConfig.city} ${siteConfig.state} | ${siteConfig.businessName}`,
+    siteName: siteConfig.displayName,
+    title: `${siteConfig.niche} ${siteConfig.city} ${siteConfig.state} | ${siteConfig.displayName}`,
     description: siteConfig.tagline,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.niche} ${siteConfig.city} | ${siteConfig.businessName}`,
+    title: `${siteConfig.niche} ${siteConfig.city} | ${siteConfig.displayName}`,
     description: siteConfig.tagline,
   },
   robots: {

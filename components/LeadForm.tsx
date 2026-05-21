@@ -55,14 +55,13 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
         <div className="text-4xl mb-3">✅</div>
-        <h3 className="text-xl font-bold text-green-800 mb-2">We got your request!</h3>
-        <p className="text-green-700">We&apos;ll call you within 1 hour during business hours to confirm your appointment.</p>
-        <a
-          href={`tel:${siteConfig.phone.replace(/\D/g, "")}`}
-          className="mt-4 inline-block bg-green-700 text-white font-bold px-6 py-3 rounded-full hover:bg-green-800 transition-colors"
-        >
-          Or call now: {siteConfig.phone}
-        </a>
+        <h3 className="text-xl font-bold text-green-800 mb-2">Request received!</h3>
+        <p className="text-green-700 leading-relaxed">
+          A local junk removal pro serving {siteConfig.city} will contact you directly — usually within 1 hour during business hours — with a free quote.
+        </p>
+        <p className="text-green-600 text-sm mt-3">
+          No obligation until you agree to a price.
+        </p>
       </div>
     );
   }
@@ -156,7 +155,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
       )}
 
       {status === "error" && (
-        <p className="text-red-600 text-sm">Something went wrong. Please call us directly at {siteConfig.phone}.</p>
+        <p className="text-red-600 text-sm">Something went wrong. Please email us at {siteConfig.contactEmail}.</p>
       )}
 
       <button

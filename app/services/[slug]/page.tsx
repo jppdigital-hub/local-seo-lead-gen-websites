@@ -18,8 +18,8 @@ export async function generateMetadata({
   const service = siteConfig.services.find((s) => s.slug === slug);
   if (!service) return {};
   return {
-    title: `${service.name} in ${siteConfig.city}, ${siteConfig.state}`,
-    description: `${service.name} in ${siteConfig.city} — ${service.shortDesc} ${service.price}. Call ${siteConfig.phone} for same-day service.`,
+    title: `${service.name} in ${siteConfig.city}, ${siteConfig.state} — Find a Local Pro | ${siteConfig.displayName}`,
+    description: `Need ${service.name.toLowerCase()} in ${siteConfig.city}? ${service.shortDesc} We connect you with a vetted local pro. Free quote, no obligation.`,
     alternates: { canonical: `/services/${slug}` },
   };
 }
@@ -48,52 +48,72 @@ export default async function ServicePage({
       <section className="bg-green-700 text-white py-14 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-5xl mb-4">{service.icon}</div>
+          <p className="text-green-300 text-sm font-medium mb-2 uppercase tracking-wide">
+            Free Referral Service · {siteConfig.city}, {siteConfig.state}
+          </p>
           <h1 className="text-4xl font-extrabold mb-3">
             {service.name} in {siteConfig.city}, {siteConfig.state}
           </h1>
-          <p className="text-green-100 text-lg max-w-2xl">{service.longDesc}</p>
-          <div className="mt-4 flex gap-4 flex-wrap items-center">
+          <p className="text-green-100 text-lg max-w-2xl leading-relaxed">{service.longDesc}</p>
+          <div className="mt-5 flex gap-3 flex-wrap items-center">
             <span className="bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-full text-sm">
-              {service.price}
+              Typical cost: {service.avgCost}
             </span>
-            <a
-              href={`tel:${siteConfig.phone.replace(/\D/g, "")}`}
-              className="text-white underline underline-offset-2 font-medium"
-            >
-              Call {siteConfig.phone}
-            </a>
+            <span className="text-green-200 text-sm">
+              Free quote · No obligation
+            </span>
           </div>
         </div>
       </section>
 
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Main content */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="rich-content">
-            <h2>
-              Why Choose {siteConfig.businessName} for {service.name}?
+        <div className="lg:col-span-2 space-y-10">
+
+          {/* What to expect */}
+          <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-green-800 mb-3">
+              What to Expect from {service.name} in {siteConfig.city}
             </h2>
+            <p className="text-green-900 text-sm leading-relaxed">{service.whatToExpect}</p>
+          </div>
+
+          {/* Rich content */}
+          <div className="rich-content">
+            <h2>How {service.name} Works in {siteConfig.city}</h2>
             <p>
-              When you need {service.name.toLowerCase()} in {siteConfig.city},{" "}
-              {siteConfig.state}, you want a crew that shows up on time, does the
-              job right, and charges a fair price. That&apos;s exactly what we deliver.
+              When you submit a request through {siteConfig.displayName}, you&apos;re connected with a licensed, insured {service.name.toLowerCase()} professional who serves your part of {siteConfig.county}. They&apos;ll contact you — usually within an hour — to confirm the details and give you an exact price before any work begins.
             </p>
+            <p>
+              <strong>There&apos;s no obligation to book</strong> until you&apos;ve heard the price and agreed. The referral through this site is completely free.
+            </p>
+
+            <h2>Tips for Your {service.name} Job</h2>
             <ul>
-              {siteConfig.trustPoints.map((p) => (
-                <li key={p}>{p}</li>
+              {service.tips.map((tip) => (
+                <li key={tip}>{tip}</li>
               ))}
             </ul>
-            <h2>Serving All of {siteConfig.county}</h2>
+
+            <h2>Service Areas for {service.name} Near {siteConfig.city}</h2>
             <p>
-              We provide {service.name.toLowerCase()} throughout {siteConfig.city} and
-              all surrounding communities including{" "}
-              {siteConfig.areas.map((a) => a.name).join(", ")}.
+              Professionals in our network provide {service.name.toLowerCase()} throughout {siteConfig.city} and all of {siteConfig.county}, including:
             </p>
+            <ul>
+              {siteConfig.areas.map((area) => (
+                <li key={area.slug}>
+                  <Link href={`/areas/${area.slug}`}>
+                    {service.name} in {area.name}
+                  </Link>{" "}
+                  — {area.blurb}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Other services */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Other Services We Offer</h3>
+            <h3 className="text-xl font-bold mb-4">Other Services Available in {siteConfig.city}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {otherServices.map((s) => (
                 <Link
@@ -112,9 +132,12 @@ export default async function ServicePage({
         {/* Sticky form */}
         <aside className="lg:sticky lg:top-24 h-fit">
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-            <h3 className="text-lg font-bold mb-1">Get a Free Quote</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              For {service.name.toLowerCase()} in {siteConfig.city}
+            <h3 className="text-lg font-bold mb-1">Get Connected with a Pro</h3>
+            <p className="text-sm text-gray-500 mb-1">
+              {service.name} in {siteConfig.city}
+            </p>
+            <p className="text-xs text-gray-400 mb-4">
+              Free referral · No obligation
             </p>
             <LeadForm compact />
           </div>

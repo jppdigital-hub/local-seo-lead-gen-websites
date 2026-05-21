@@ -4,11 +4,12 @@ export function localBusinessSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: siteConfig.businessName,
-    description: siteConfig.tagline,
-    telephone: siteConfig.phone,
-    email: siteConfig.email,
+    // Use a generic service business type appropriate for a referral directory
+    "@id": siteConfig.domain,
+    name: siteConfig.siteName,
+    description: siteConfig.siteDescription,
     url: siteConfig.domain,
+    email: siteConfig.contactEmail,
     address: {
       "@type": "PostalAddress",
       addressLocality: siteConfig.city,
@@ -24,27 +25,6 @@ export function localBusinessSchema() {
     areaServed: [
       { "@type": "City", name: siteConfig.city },
       ...siteConfig.areas.map((a) => ({ "@type": "City", name: a.name })),
-    ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: siteConfig.stats.rating,
-      reviewCount: siteConfig.stats.reviewCount,
-      bestRating: "5",
-      worstRating: "1",
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "07:00",
-        closes: "19:00",
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Saturday"],
-        opens: "08:00",
-        closes: "17:00",
-      },
     ],
   };
 }
@@ -72,7 +52,7 @@ export function serviceSchema(serviceName: string, description: string) {
     description,
     provider: {
       "@type": "LocalBusiness",
-      name: siteConfig.businessName,
+      name: siteConfig.siteName,
       url: siteConfig.domain,
     },
     areaServed: {

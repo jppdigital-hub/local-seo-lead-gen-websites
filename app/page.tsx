@@ -5,8 +5,8 @@ import { faqSchema } from "@/lib/schema";
 import LeadForm from "@/components/LeadForm";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.niche} ${siteConfig.city} TN | Same-Day Service | ${siteConfig.businessName}`,
-  description: `Need ${siteConfig.niche.toLowerCase()} in ${siteConfig.city}, ${siteConfig.state}? ${siteConfig.businessName} offers same-day pickup, upfront pricing, and serves all of ${siteConfig.county}. Call ${siteConfig.phone}.`,
+  title: `Junk Removal Chattanooga TN — Find a Local Pro | ${siteConfig.displayName}`,
+  description: `Need junk removal in Chattanooga, TN? We connect you with licensed, insured local pros who serve all of Hamilton County. Free quotes, same-day available.`,
   alternates: { canonical: "/" },
 };
 
@@ -23,7 +23,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="inline-block bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">
-              ⚡ Same-Day Service Available
+              Free Referral Service — No Obligation
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
               {siteConfig.heroHeading}
@@ -31,7 +31,10 @@ export default function HomePage() {
             <p className="text-lg text-green-100 mb-6 leading-relaxed">
               {siteConfig.heroSubheading}
             </p>
-            <div className="flex flex-wrap gap-3 mb-8">
+            <div className="bg-green-600/40 border border-green-400/40 rounded-xl p-4 mb-6 text-sm text-green-100 leading-relaxed">
+              <strong className="text-white">How it works:</strong> You describe the job → we connect you with a vetted local pro → they call you with a free quote. You only pay if you decide to book.
+            </div>
+            <div className="flex flex-wrap gap-3">
               {siteConfig.trustPoints.map((point) => (
                 <span
                   key={point}
@@ -41,40 +44,89 @@ export default function HomePage() {
                 </span>
               ))}
             </div>
-            <a
-              href={`tel:${siteConfig.phone.replace(/\D/g, "")}`}
-              className="inline-block bg-yellow-400 text-gray-900 font-extrabold text-xl px-8 py-4 rounded-full hover:bg-yellow-300 transition-colors shadow-lg"
-            >
-              📞 {siteConfig.phone}
-            </a>
-            <p className="mt-3 text-green-200 text-sm">
-              ⭐ {siteConfig.stats.rating}/5 from {siteConfig.stats.reviewCount} reviews
-            </p>
           </div>
 
           {/* Lead form */}
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-gray-900">
-            <h2 className="text-xl font-bold mb-1 text-gray-900">Get Your Free Quote</h2>
-            <p className="text-sm text-gray-500 mb-5">We respond within 1 hour</p>
+            <h2 className="text-xl font-bold mb-1 text-gray-900">Get a Free Quote</h2>
+            <p className="text-sm text-gray-500 mb-5">
+              A local pro will contact you — usually within 1 hour.
+            </p>
             <LeadForm compact />
           </div>
         </div>
       </section>
 
-      {/* ── Stats bar ── */}
-      <section className="bg-green-800 text-white py-6 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: siteConfig.stats.jobsCompleted, label: "Jobs Completed" },
-            { value: siteConfig.stats.yearsInBusiness + " Years", label: "In Business" },
-            { value: siteConfig.stats.rating + " ⭐", label: "Average Rating" },
-            { value: siteConfig.stats.citiesServed, label: "Cities Served" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <div className="text-3xl font-extrabold text-yellow-400">{stat.value}</div>
-              <div className="text-green-200 text-sm mt-1">{stat.label}</div>
-            </div>
-          ))}
+      {/* ── How it works ── */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-2">How Our Referral Service Works</h2>
+          <p className="text-center text-gray-500 mb-10 max-w-2xl mx-auto">
+            We&apos;re not the junk removal company — we connect you with the right local professional for your job. Here&apos;s what happens after you submit your request.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {siteConfig.howItWorks.map((item) => (
+              <div key={item.step} className="text-center bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="w-14 h-14 bg-green-700 text-white rounded-full flex items-center justify-center text-2xl font-extrabold mx-auto mb-4">
+                  {item.step}
+                </div>
+                <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-gray-400 text-xs mt-8">
+            This is a free referral service. The local professional charges for the junk removal work — we charge nothing for the connection.
+          </p>
+        </div>
+      </section>
+
+      {/* ── About junk removal in Chattanooga ── */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-6">
+            Junk Removal in Chattanooga, TN — What You Need to Know
+          </h2>
+          <div className="rich-content">
+            <p>
+              Chattanooga and Hamilton County generate significant demand for junk removal services year-round. Between the region&apos;s older housing stock, active real estate market, and frequent storms that leave yards full of debris, local residents and property owners regularly need fast, reliable haul-away service.
+            </p>
+            <p>
+              Unlike many larger metro areas, Chattanooga&apos;s junk removal market is dominated by small, locally owned operators — not national franchises. That means the quality and availability of service can vary significantly from one provider to the next. Price differences of 30–50% for the same job are common. A referral service like this one helps you skip the guesswork and get connected with a professional who knows the local area, pricing, and disposal options.
+            </p>
+            <h2>What Does Junk Removal Cost in Chattanooga?</h2>
+            <p>
+              Most junk removal in Chattanooga is priced by the truckload or fraction thereof. Here&apos;s a rough guide to what you can expect:
+            </p>
+            <ul>
+              <li><strong>Single item (one sofa, one appliance):</strong> $75 – $125</li>
+              <li><strong>Quarter truckload (a few items, small pile):</strong> $100 – $175</li>
+              <li><strong>Half truckload (medium cleanout or 6–8 items):</strong> $175 – $275</li>
+              <li><strong>Full truckload (large cleanout, renovation debris):</strong> $300 – $500</li>
+              <li><strong>Estate cleanout or specialty items (hot tubs, pianos):</strong> Quoted individually</li>
+            </ul>
+            <p>
+              Prices vary based on the type of material, ease of access, and whether any items require special disposal (appliances with refrigerants, electronics with e-waste fees, etc.). All quotes from pros in our network are free and given before any work begins.
+            </p>
+            <h2>What Can Junk Removal Pros Haul?</h2>
+            <p>
+              Licensed junk removal professionals in Chattanooga handle a wide range of materials. Common items include:
+            </p>
+            <ul>
+              <li>Furniture (sofas, beds, dressers, tables, chairs)</li>
+              <li>Appliances (refrigerators, washers, dryers, dishwashers, AC units)</li>
+              <li>Electronics (TVs, computers, printers — e-waste fees may apply)</li>
+              <li>Mattresses and box springs</li>
+              <li>Yard waste and storm debris (branches, brush, stumps, soil)</li>
+              <li>Construction and renovation debris (drywall, lumber, tile, concrete)</li>
+              <li>Hot tubs and spas</li>
+              <li>Exercise equipment</li>
+              <li>Estate and garage cleanouts</li>
+            </ul>
+            <p>
+              Items that cannot be hauled include: hazardous waste, paint and solvents, asbestos, motor oil, propane tanks, medical waste, and certain chemicals. If you&apos;re unsure about a specific item, mention it in your request and the pro will clarify.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -82,10 +134,10 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-gray-50" id="services">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2">
-            {siteConfig.niche} Services in {siteConfig.city}
+            Types of Junk Removal We Connect You With
           </h2>
           <p className="text-center text-gray-500 mb-10">
-            We haul almost anything. Click a service for details and pricing.
+            Local pros in Chattanooga handle all of the following. Click any service for a full guide.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {siteConfig.services.map((service) => (
@@ -99,58 +151,21 @@ export default function HomePage() {
                   {service.name}
                 </h3>
                 <p className="text-gray-500 text-sm mb-3">{service.shortDesc}</p>
-                <span className="text-green-700 font-semibold text-sm">{service.price}</span>
+                <span className="text-green-700 font-semibold text-sm">{service.avgCost}</span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">How It Works</h2>
-          <p className="text-center text-gray-500 mb-10">
-            {siteConfig.niche} in {siteConfig.city} couldn&apos;t be simpler.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Call or Request a Quote",
-                desc: `Call ${siteConfig.phone} or fill out the form. We give you a price before we start — no surprises.`,
-              },
-              {
-                step: "2",
-                title: "We Show Up & Haul",
-                desc: "Our uniformed crew arrives on time, loads everything, and cleans up after themselves.",
-              },
-              {
-                step: "3",
-                title: "You're Done",
-                desc: "We handle disposal, recycling, and donation wherever possible. You just enjoy your clear space.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-14 h-14 bg-green-700 text-white rounded-full flex items-center justify-center text-2xl font-extrabold mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Areas served ── */}
-      <section className="py-16 px-4 bg-gray-50" id="areas">
+      <section className="py-16 px-4" id="areas">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2">
-            Areas We Serve
+            Serving Chattanooga and All of Hamilton County
           </h2>
-          <p className="text-center text-gray-500 mb-8">
-            We serve {siteConfig.city} and all surrounding communities in {siteConfig.county}.
+          <p className="text-center text-gray-500 mb-8 max-w-2xl mx-auto">
+            The professionals in our network cover {siteConfig.city} and all surrounding communities. Click your area to see local junk removal details.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
@@ -173,7 +188,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10">
             Frequently Asked Questions
@@ -182,7 +197,7 @@ export default function HomePage() {
             {siteConfig.faqs.map((faq) => (
               <details
                 key={faq.q}
-                className="border border-gray-200 rounded-xl overflow-hidden group"
+                className="border border-gray-200 rounded-xl overflow-hidden group bg-white"
               >
                 <summary className="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-gray-800 hover:bg-gray-50 list-none">
                   {faq.q}
@@ -203,22 +218,17 @@ export default function HomePage() {
           Ready to Clear the Clutter?
         </h2>
         <p className="text-green-100 mb-6 max-w-xl mx-auto">
-          Get a free, no-obligation quote today. Same-day service available for {siteConfig.city} and surrounding areas.
+          Submit your job details and we&apos;ll connect you with a local Chattanooga junk removal pro — free, no obligation.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href={`tel:${siteConfig.phone.replace(/\D/g, "")}`}
-            className="bg-white text-green-700 font-extrabold px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-colors"
-          >
-            📞 Call {siteConfig.phone}
-          </a>
-          <Link
-            href="/contact"
-            className="bg-yellow-400 text-gray-900 font-extrabold px-8 py-4 rounded-full text-lg hover:bg-yellow-300 transition-colors"
-          >
-            Request a Quote Online
-          </Link>
-        </div>
+        <Link
+          href="/contact"
+          className="inline-block bg-yellow-400 text-gray-900 font-extrabold px-10 py-4 rounded-full text-lg hover:bg-yellow-300 transition-colors"
+        >
+          Get Your Free Quote
+        </Link>
+        <p className="mt-4 text-green-200 text-sm">
+          This is a free referral service. No fees, no obligation until you book with the pro.
+        </p>
       </section>
     </>
   );
