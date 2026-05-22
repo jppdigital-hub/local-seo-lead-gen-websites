@@ -82,7 +82,7 @@ export default async function ServicePage({
           <div className="rich-content">
             <h2>How {service.name} Works in {siteConfig.city}</h2>
             <p>
-              When you submit a request through {siteConfig.displayName}, you&apos;re connected with a licensed, insured {service.name.toLowerCase()} professional who serves your part of {siteConfig.county}. They&apos;ll contact you — usually within an hour — to confirm the details and give you an exact price before any work begins.
+              When you submit a request through {siteConfig.displayName}, you&apos;re connected with a licensed, insured {service.name.toLowerCase()} professional who serves your part of {siteConfig.county}. They&apos;ll contact you to confirm the details and give you an exact price before any work begins.
             </p>
             <p>
               <strong>There&apos;s no obligation to book</strong> until you&apos;ve heard the price and agreed. The referral through this site is completely free.
@@ -104,8 +104,8 @@ export default async function ServicePage({
                 <li key={area.slug}>
                   <Link href={`/areas/${area.slug}`}>
                     {service.name} in {area.name}
-                  </Link>{" "}
-                  — {area.blurb}
+                  </Link>{": "}
+                  {area.blurb}
                 </li>
               ))}
             </ul>

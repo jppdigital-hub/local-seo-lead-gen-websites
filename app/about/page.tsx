@@ -29,7 +29,7 @@ export default function AboutPage() {
           Finding a reliable junk removal pro in {siteConfig.city} takes time. You&apos;d normally spend 20–30 minutes searching, reading reviews, calling multiple companies, and comparing prices. We&apos;ve done the groundwork: we&apos;ve identified licensed, insured local pros who serve {siteConfig.county}, and we forward your job request to the right one for your area and your type of job.
         </p>
         <p>
-          You get a call within an hour (usually much faster). You hear a price. If you like it, you book. If not, there&apos;s no obligation.
+          When the pro contacts you, they will give you a price. If you like it, you book. If not, there&apos;s no obligation.
         </p>
 
         <h2>Step-by-Step: What Happens After You Submit a Request</h2>
@@ -64,7 +64,7 @@ export default function AboutPage() {
         <ul>
           {siteConfig.areas.map((area) => (
             <li key={area.slug}>
-              <Link href={`/areas/${area.slug}`}>{area.name}</Link> — {area.blurb}
+              <Link href={`/areas/${area.slug}`}>{area.name}</Link>: {area.blurb}
             </li>
           ))}
         </ul>

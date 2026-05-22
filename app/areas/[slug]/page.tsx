@@ -46,7 +46,7 @@ export default async function AreaPage({
             Junk Removal in {area.name}, {siteConfig.state}
           </h1>
           <p className="text-green-100 text-lg max-w-2xl leading-relaxed">
-            {area.blurb} We connect {area.name} residents with licensed, insured junk removal professionals — free quotes, no obligation.
+            {area.blurb} We connect {area.name} residents with licensed, insured junk removal professionals. Free quotes, no obligation.
           </p>
           <div className="mt-5">
             <span className="bg-green-600/50 text-white text-sm px-4 py-2 rounded-full">
@@ -91,8 +91,8 @@ export default async function AreaPage({
                 <li key={s.slug}>
                   <Link href={`/services/${s.slug}`}>
                     <strong>{s.name}</strong>
-                  </Link>{" "}
-                  — {s.shortDesc} Typical cost: {s.avgCost}.
+                  </Link>{": "}
+                  {s.shortDesc} Typical cost: {s.avgCost}.
                 </li>
               ))}
             </ul>
@@ -127,7 +127,7 @@ export default async function AreaPage({
               </li>
               {otherAreas.map((a) => (
                 <li key={a.slug}>
-                  <Link href={`/areas/${a.slug}`}>{a.name}</Link> — {a.blurb}
+                  <Link href={`/areas/${a.slug}`}>{a.name}</Link>: {a.blurb}
                 </li>
               ))}
             </ul>

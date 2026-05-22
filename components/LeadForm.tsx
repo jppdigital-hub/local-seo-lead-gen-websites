@@ -57,7 +57,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         <div className="text-4xl mb-3">✅</div>
         <h3 className="text-xl font-bold text-green-800 mb-2">Request received!</h3>
         <p className="text-green-700 leading-relaxed">
-          A local junk removal pro serving {siteConfig.city} will contact you directly — usually within 1 hour during business hours — with a free quote.
+          A local junk removal pro serving {siteConfig.city} will contact you directly with a free quote.
         </p>
         <p className="text-green-600 text-sm mt-3">
           No obligation until you agree to a price.
@@ -167,7 +167,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
       </button>
 
       <p className="text-xs text-gray-500 text-center">
-        No obligation. We typically respond within 1 hour.
+        No obligation. Free referral service.
       </p>
     </form>
   );

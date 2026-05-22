@@ -50,7 +50,7 @@ export default function HomePage() {
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-gray-900">
             <h2 className="text-xl font-bold mb-1 text-gray-900">Get a Free Quote</h2>
             <p className="text-sm text-gray-500 mb-5">
-              A local pro will contact you — usually within 1 hour.
+              A local pro will contact you with a free quote.
             </p>
             <LeadForm compact />
           </div>
@@ -218,7 +218,7 @@ export default function HomePage() {
           Ready to Clear the Clutter?
         </h2>
         <p className="text-green-100 mb-6 max-w-xl mx-auto">
-          Submit your job details and we&apos;ll connect you with a local Chattanooga junk removal pro — free, no obligation.
+          Submit your job details and we&apos;ll connect you with a local Chattanooga junk removal pro. Free, no obligation.
         </p>
         <Link
           href="/contact"
