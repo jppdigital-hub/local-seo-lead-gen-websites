@@ -6,13 +6,13 @@ export const siteConfig = {
   // --- Site identity (connector/directory model, not the service provider) ---
   siteName: "Chattanooga Junk Removal Guide",
   // Displayed in header, footer, emails
-  displayName: "ChattanoogaJunkRemoval.com",
+  displayName: "ChattanoogaJunkRemovalPros.com",
   tagline: "Find Trusted Junk Removal Pros in Chattanooga, TN",
   // Transparent description used in About page and schema
   siteDescription:
     "We help Chattanooga residents find licensed, insured junk removal professionals in their area. Submit your job details and a local pro will contact you with a free quote.",
-  contactEmail: "hello@chattanoogajunkremoval.com",
-  domain: "https://chattanoogajunkremoval.com",
+  contactEmail: "hello@chattanoogajunkremovalpros.com",
+  domain: "https://chattanoogajunkremovalpros.com",
 
   // --- Market ---
   niche: "Junk Removal",
@@ -224,7 +224,7 @@ export const siteConfig = {
   faqs: [
     {
       q: "Are you the junk removal company?",
-      a: "No. ChattanoogaJunkRemoval.com is a free referral service. You describe your job, and we connect you with a licensed, insured local junk removal professional who serves your area. The pro contacts you directly with a free quote. You decide whether to book with no pressure.",
+      a: "No. ChattanoogaJunkRemovalPros.com is a free referral service. You describe your job, and we connect you with a licensed, insured local junk removal professional who serves your area. The pro contacts you directly with a free quote. You decide whether to book with no pressure.",
     },
     {
       q: "How much does junk removal cost in Chattanooga?",
