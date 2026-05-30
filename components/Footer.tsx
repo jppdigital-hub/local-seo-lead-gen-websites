@@ -14,16 +14,16 @@ const resourceLinks = [
 
 const officialSourceLinks = [
   {
-    href: "https://chattanooga.gov/services/waste-recycling/bulky-trash-collection",
-    label: "City of Chattanooga Bulky Trash Collection",
+    href: "https://chattanooga.gov/services/waste-recycling/brush-collection",
+    label: "City of Chattanooga Brush and Bulk Trash Collection",
   },
   {
     href: "https://chattanooga.gov/services/waste-recycling/refuse-collection-centers",
     label: "City of Chattanooga Refuse Collection Centers",
   },
   {
-    href: "https://www.hamiltontn.gov/Recycling.aspx",
-    label: "Hamilton County Recycling Centers",
+    href: "https://recycle.hamiltontn.gov/",
+    label: "Hamilton County Recycling Department",
   },
   {
     href: "https://www.epa.gov/section608/stationary-refrigeration-safe-disposal-requirements",
