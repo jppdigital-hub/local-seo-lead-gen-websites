@@ -9,6 +9,7 @@ interface LeadFormData {
   service: string;
   cityZip: string;
   message: string;
+  consent: boolean;
   photo: File | null;
 }
 
@@ -20,12 +21,18 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
     service: "",
     cityZip: "",
     message: "",
+    consent: false,
   });
   const [photo, setPhoto] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const target = e.target;
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      setForm((prev) => ({ ...prev, [target.name]: target.checked }));
+      return;
+    }
+    setForm((prev) => ({ ...prev, [target.name]: target.value }));
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,10 +45,24 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
 
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([k, v]) => formData.append(k, v));
-      formData.append("source", typeof window !== "undefined" ? window.location.href : "");
+      formData.append("name", form.name);
+      formData.append("phone", form.phone);
+      formData.append("email", form.email);
+      formData.append("service", form.service);
+      formData.append("cityZip", form.cityZip);
+      formData.append("message", form.message);
+      formData.append("consent", form.consent ? "yes" : "no");
+
+      if (typeof window !== "undefined") {
+        formData.append("source", window.location.href);
+        formData.append("sourcePage", window.location.pathname);
+        formData.append("landingPage", window.location.href);
+        formData.append("referrer", document.referrer || "direct");
+      }
+
       formData.append("timestamp", new Date().toISOString());
       formData.append("market", `${siteConfig.niche} - ${siteConfig.city}, ${siteConfig.state}`);
+      formData.append("siteName", siteConfig.displayName);
       if (photo) formData.append("photo", photo);
 
       const response = await fetch("/api/lead", {
@@ -54,7 +75,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
       }
 
       setStatus("success");
-      setForm({ name: "", phone: "", email: "", service: "", cityZip: "", message: "" });
+      setForm({ name: "", phone: "", email: "", service: "", cityZip: "", message: "", consent: false });
       setPhoto(null);
     } catch {
       setStatus("error");
@@ -70,15 +91,17 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
           Your request has been received. A local junk removal pro will be in touch with a free quote.
         </p>
         <p className="text-green-600 text-sm mt-3">
-          No obligation until you agree to a price. The pro performs the work — we charge nothing for the connection.
+          No obligation until you agree to a price. The pro performs the work. We charge nothing for the connection.
         </p>
       </div>
     );
   }
 
+  const gridClass = compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className={compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+      <div className={gridClass}>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
             Your Name *
@@ -111,7 +134,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      <div className={compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+      <div className={gridClass}>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
             Email Address *
@@ -146,16 +169,17 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="service">
-          What do you need removed?
+          What do you need removed? *
         </label>
         <select
           id="service"
           name="service"
+          required
           value={form.service}
           onChange={handleChange}
           className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
         >
-          <option value="">— Select a service —</option>
+          <option value="">Select a service</option>
           {siteConfig.services.map((s) => (
             <option key={s.slug} value={s.name}>
               {s.name}
@@ -165,41 +189,51 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         </select>
       </div>
 
-      {!compact && (
-        <>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="message">
-              Describe what you need hauled (optional)
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              rows={3}
-              value={form.message}
-              onChange={handleChange}
-              placeholder="e.g. Old couch and mattress in the garage, second floor, needs pickup this week"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-            />
-          </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="message">
+          Describe what you need hauled
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows={compact ? 2 : 3}
+          value={form.message}
+          onChange={handleChange}
+          placeholder="e.g. Old couch and mattress in the garage, second floor, needs pickup this week"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+        />
+      </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
-              Photo (optional)
-            </label>
-            <input
-              id="photo"
-              name="photo"
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Upload a photo if you can. It helps the pro give a faster, more accurate quote.
-            </p>
-          </div>
-        </>
-      )}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
+          Photo (optional)
+        </label>
+        <input
+          id="photo"
+          name="photo"
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoChange}
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
+        />
+        <p className="text-xs text-gray-400 mt-1">
+          Upload a photo if you can. It helps the pro give a faster, more accurate quote.
+        </p>
+      </div>
+
+      <label className="flex items-start gap-3 text-xs text-gray-500 leading-relaxed">
+        <input
+          name="consent"
+          type="checkbox"
+          required
+          checked={form.consent}
+          onChange={handleChange}
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-green-700 focus:ring-green-500"
+        />
+        <span>
+          I agree to be contacted about my junk removal request by ChattanoogaJunkRemovalPros.com and/or a local junk removal professional. I understand this is a free referral service and there is no obligation to book.
+        </span>
+      </label>
 
       {status === "error" && (
         <p className="text-red-600 text-sm">Something went wrong. Please email us at {siteConfig.contactEmail}.</p>
@@ -210,7 +244,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         disabled={status === "sending"}
         className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white font-bold py-4 rounded-full text-lg transition-colors"
       >
-        {status === "sending" ? "Sending…" : "Get My Free Quote →"}
+        {status === "sending" ? "Sending..." : "Get My Free Quote"}
       </button>
 
       <div className="text-xs text-gray-500 space-y-0.5 text-center">

@@ -19,11 +19,11 @@ export async function generateMetadata({
   if (!area) return {};
   return {
     title: `Junk Removal in ${area.name}, ${siteConfig.state} | Free Local Quote`,
-    description: `Need junk removal in ${area.name}, ${siteConfig.state}? We connect ${area.name} residents with licensed, insured local pros. Free quotes, no obligation.`,
+    description: `Need junk removal in ${area.name}, ${siteConfig.state}? We connect ${area.name} residents with local pros. Free quotes, no obligation.`,
     alternates: { canonical: `/areas/${slug}` },
     openGraph: {
       title: `Junk Removal in ${area.name}, ${siteConfig.state}`,
-      description: `Free referral service connecting ${area.name} residents with licensed junk removal pros. No obligation until you agree to a price.`,
+      description: `Free referral service connecting ${area.name} residents with local junk removal pros. No obligation until you agree to a price.`,
       url: `${siteConfig.domain}/areas/${slug}`,
     },
   };
@@ -47,7 +47,7 @@ export default async function AreaPage({
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(serviceSchema(
             `Junk Removal Referral Service in ${area.name}`,
-            `Free referral service connecting ${area.name} residents with licensed, insured junk removal professionals.`,
+            `Free referral service connecting ${area.name} residents with local junk removal professionals.`,
             area.name
           )),
         }}
@@ -88,7 +88,7 @@ export default async function AreaPage({
             Junk Removal in {area.name}, {siteConfig.state}
           </h1>
           <p className="text-green-100 text-lg max-w-2xl leading-relaxed">
-            {area.blurb} We connect {area.name} residents with licensed, insured junk removal professionals. Free quotes, no obligation.
+            {area.blurb} We connect {area.name} residents with local junk removal professionals. Free quotes, no obligation.
           </p>
           <div className="mt-5 flex gap-3 flex-wrap">
             <span className="bg-green-600/50 text-white text-sm px-4 py-2 rounded-full">
@@ -99,7 +99,7 @@ export default async function AreaPage({
             </span>
           </div>
           <p className="text-green-200 text-xs mt-3">
-            We are not a junk removal company. We connect you with a licensed local pro who performs the work.
+            We are not a junk removal company. We connect you with a local pro who performs the work, sets pricing, and handles scheduling directly.
           </p>
         </div>
       </section>
@@ -123,7 +123,7 @@ export default async function AreaPage({
           {/* Common jobs */}
           <div className="bg-white border border-gray-200 rounded-xl p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-3">Most Common Junk Removal Jobs in {area.name}</h2>
-            <ul className="space-y-2">
+            <ul className="space-y-2 list-none pl-0">
               {area.commonJobs.map((job) => (
                 <li key={job} className="flex items-start gap-2 text-sm text-gray-700">
                   <span className="text-green-600 mt-0.5 flex-shrink-0">✓</span>
@@ -138,7 +138,7 @@ export default async function AreaPage({
             <h2 className="text-lg font-bold text-gray-800 mb-2">
               How the Referral Works for {area.name} Residents
             </h2>
-            <ol className="space-y-2 text-sm text-gray-700">
+            <ol className="space-y-2 text-sm text-gray-700 list-none pl-0">
               {siteConfig.howItWorks.map((step) => (
                 <li key={step.step} className="flex gap-3">
                   <span className="w-5 h-5 bg-green-700 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
@@ -149,7 +149,7 @@ export default async function AreaPage({
               ))}
             </ol>
             <p className="text-xs text-gray-500 mt-3">
-              This is a free referral service. The local professional charges for the work — we charge nothing for the connection.
+              This is a free referral service. The local professional charges for the work. We charge nothing for the connection.
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export default async function AreaPage({
             </ul>
           </div>
 
-          {/* Local resources — shown only if present */}
+          {/* Local resources shown only if present */}
           {area.localResources.length > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
               <h2 className="text-lg font-bold text-blue-900 mb-3">Local Resources Near {area.name}</h2>
@@ -252,7 +252,7 @@ export default async function AreaPage({
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
             <h3 className="text-lg font-bold mb-1">Free Quote for {area.name}</h3>
             <p className="text-sm text-gray-500 mb-1">
-              Junk removal — all of {siteConfig.county}
+              Junk removal, all of {siteConfig.county}
             </p>
             <p className="text-xs text-gray-400 mb-4">
               Free referral · No obligation · Local pro contacts you

@@ -19,11 +19,11 @@ export async function generateMetadata({
   if (!service) return {};
   return {
     title: `${service.name} in ${siteConfig.city}, ${siteConfig.state} | Free Local Quote`,
-    description: `Need ${service.name.toLowerCase()} in ${siteConfig.city}? ${service.shortDesc} We connect you with a licensed local pro. Free quote, no obligation.`,
+    description: `Need ${service.name.toLowerCase()} in ${siteConfig.city}? ${service.shortDesc} We connect you with a local pro. Free quote, no obligation.`,
     alternates: { canonical: `/services/${slug}` },
     openGraph: {
       title: `${service.name} in ${siteConfig.city}, ${siteConfig.state}`,
-      description: `${service.shortDesc} Free referral service — the local pro contacts you with a quote.`,
+      description: `${service.shortDesc} Free referral service, the local pro contacts you with a quote.`,
       url: `${siteConfig.domain}/services/${slug}`,
     },
   };
@@ -94,7 +94,7 @@ export default async function ServicePage({
             </span>
           </div>
           <p className="text-green-200 text-xs mt-3">
-            We are not a junk removal company. We connect you with a licensed local pro who performs the work.
+            We are not a junk removal company. We connect you with a local pro who performs the work, sets pricing, and handles scheduling directly.
           </p>
         </div>
       </section>
@@ -103,7 +103,7 @@ export default async function ServicePage({
         {/* Main content */}
         <div className="lg:col-span-2 space-y-10">
 
-          {/* Regulatory notes — shown only if present */}
+          {/* Regulatory notes shown only if present */}
           {service.regulatoryNotes && (
             <div className="bg-amber-50 border border-amber-300 rounded-xl p-5">
               <h2 className="text-base font-bold text-amber-900 mb-2">
@@ -129,7 +129,7 @@ export default async function ServicePage({
                   <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <span className="text-green-600">✓</span> What Pros Can Haul
                   </h3>
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-1.5 list-none pl-0">
                     {service.acceptedItems.map((item) => (
                       <li key={item} className="text-sm text-gray-600 flex items-start gap-2">
                         <span className="text-green-500 mt-0.5 flex-shrink-0">•</span>
@@ -144,7 +144,7 @@ export default async function ServicePage({
                   <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <span className="text-red-500">✗</span> What Pros Cannot Haul
                   </h3>
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-1.5 list-none pl-0">
                     {service.refusedItems.map((item) => (
                       <li key={item} className="text-sm text-gray-600 flex items-start gap-2">
                         <span className="text-red-400 mt-0.5 flex-shrink-0">•</span>
@@ -161,10 +161,10 @@ export default async function ServicePage({
           <div className="rich-content">
             <h2>How {service.name} Works in {siteConfig.city}</h2>
             <p>
-              When you submit a request through {siteConfig.displayName}, you are connected with a licensed, insured {service.name.toLowerCase()} professional who serves your part of {siteConfig.county}. They contact you to confirm the details and give you an exact price before any work begins.
+              When you submit a request through {siteConfig.displayName}, you are connected with a local {service.name.toLowerCase()} professional who serves your part of {siteConfig.county}. They contact you to confirm the details and give you an exact price before any work begins.
             </p>
             <p>
-              <strong>There is no obligation to book</strong> until you have heard the price and agreed. The referral through this site is completely free.
+              <strong>There is no obligation to book</strong> until you have heard the price and agreed. The referral through this site is completely free. You should verify insurance, pricing, and service details directly with the pro before work begins.
             </p>
 
             <h2>Tips for Your {service.name} Job</h2>
@@ -231,7 +231,7 @@ export default async function ServicePage({
             </div>
             <div className="mt-3">
               <Link href="/services" className="text-green-700 text-sm font-semibold hover:underline">
-                View all services →
+                View all services
               </Link>
             </div>
           </div>
