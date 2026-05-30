@@ -7,21 +7,29 @@ interface FormData {
   phone: string;
   email: string;
   service: string;
+  cityZip: string;
   message: string;
+  photo: File | null;
 }
 
 export default function LeadForm({ compact = false }: { compact?: boolean }) {
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState<Omit<FormData, "photo">>({
     name: "",
     phone: "",
     email: "",
     service: "",
+    cityZip: "",
     message: "",
   });
+  const [photo, setPhoto] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhoto(e.target.files?.[0] ?? null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -29,23 +37,23 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
     setStatus("sending");
 
     try {
-      const payload = {
-        ...form,
-        source: typeof window !== "undefined" ? window.location.href : "",
-        timestamp: new Date().toISOString(),
-        market: `${siteConfig.niche} - ${siteConfig.city}, ${siteConfig.state}`,
-      };
+      const formData = new FormData();
+      Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+      formData.append("source", typeof window !== "undefined" ? window.location.href : "");
+      formData.append("timestamp", new Date().toISOString());
+      formData.append("market", `${siteConfig.niche} - ${siteConfig.city}, ${siteConfig.state}`);
+      if (photo) formData.append("photo", photo);
 
       if (siteConfig.leadWebhookUrl) {
         await fetch(siteConfig.leadWebhookUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: formData,
         });
       }
 
       setStatus("success");
-      setForm({ name: "", phone: "", email: "", service: "", message: "" });
+      setForm({ name: "", phone: "", email: "", service: "", cityZip: "", message: "" });
+      setPhoto(null);
     } catch {
       setStatus("error");
     }
@@ -57,10 +65,10 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         <div className="text-4xl mb-3">✅</div>
         <h3 className="text-xl font-bold text-green-800 mb-2">Request received!</h3>
         <p className="text-green-700 leading-relaxed">
-          A local junk removal pro serving {siteConfig.city} will contact you directly with a free quote.
+          Your request has been received. A local junk removal pro will be in touch with a free quote.
         </p>
         <p className="text-green-600 text-sm mt-3">
-          No obligation until you agree to a price.
+          No obligation until you agree to a price. The pro performs the work — we charge nothing for the connection.
         </p>
       </div>
     );
@@ -101,19 +109,37 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-          Email Address
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="john@example.com"
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
+      <div className={compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+            Email Address *
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={form.email}
+            onChange={handleChange}
+            placeholder="john@example.com"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="cityZip">
+            City or Zip Code *
+          </label>
+          <input
+            id="cityZip"
+            name="cityZip"
+            type="text"
+            required
+            value={form.cityZip}
+            onChange={handleChange}
+            placeholder="Chattanooga or 37401"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
       </div>
 
       <div>
@@ -138,20 +164,39 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
       </div>
 
       {!compact && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="message">
-            Describe what you need hauled (optional)
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            rows={3}
-            value={form.message}
-            onChange={handleChange}
-            placeholder="e.g. Old couch and mattress in the garage, needs same-day pickup"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-          />
-        </div>
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="message">
+              Describe what you need hauled (optional)
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows={3}
+              value={form.message}
+              onChange={handleChange}
+              placeholder="e.g. Old couch and mattress in the garage, second floor, needs pickup this week"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
+              Photo (optional)
+            </label>
+            <input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Upload a photo if you can. It helps the pro give a faster, more accurate quote.
+            </p>
+          </div>
+        </>
       )}
 
       {status === "error" && (
@@ -166,9 +211,10 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         {status === "sending" ? "Sending…" : "Get My Free Quote →"}
       </button>
 
-      <p className="text-xs text-gray-500 text-center">
-        No obligation. Free referral service.
-      </p>
+      <div className="text-xs text-gray-500 space-y-0.5 text-center">
+        <p>Free referral service. No obligation.</p>
+        <p>We are not a junk removal company. The local pro contacts you directly.</p>
+      </div>
     </form>
   );
 }
