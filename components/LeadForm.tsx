@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { siteConfig } from "@/lib/site-config";
 
-interface FormData {
+interface LeadFormData {
   name: string;
   phone: string;
   email: string;
@@ -13,7 +13,7 @@ interface FormData {
 }
 
 export default function LeadForm({ compact = false }: { compact?: boolean }) {
-  const [form, setForm] = useState<Omit<FormData, "photo">>({
+  const [form, setForm] = useState<Omit<LeadFormData, "photo">>({
     name: "",
     phone: "",
     email: "",
@@ -44,11 +44,13 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
       formData.append("market", `${siteConfig.niche} - ${siteConfig.city}, ${siteConfig.state}`);
       if (photo) formData.append("photo", photo);
 
-      if (siteConfig.leadWebhookUrl) {
-        await fetch(siteConfig.leadWebhookUrl, {
-          method: "POST",
-          body: formData,
-        });
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Lead submission failed");
       }
 
       setStatus("success");
