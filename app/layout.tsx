@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 import { organizationSchema, websiteSchema, referralServiceSchema } from "@/lib/schema";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TextNormalizer from "@/components/TextNormalizer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -73,6 +74,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+        <TextNormalizer />
         <Header />
         <main>{children}</main>
         <Footer />
