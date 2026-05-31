@@ -1,32 +1,79 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { siteConfig } from "@/lib/site-config";
 
-interface LeadFormData {
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (element: HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+    };
+    onTurnstileLoad?: () => void;
+  }
+}
+
+interface LeadFormFields {
   name: string;
   phone: string;
   email: string;
   service: string;
-  cityZip: string;
-  message: string;
+  city: string;
+  description: string;
   consent: boolean;
-  photo: File | null;
 }
 
-export default function LeadForm({ compact = false }: { compact?: boolean }) {
-  const [form, setForm] = useState<Omit<LeadFormData, "photo">>({
-    name: "",
-    phone: "",
-    email: "",
-    service: "",
-    cityZip: "",
-    message: "",
-    consent: false,
-  });
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+const EMPTY_FORM: LeadFormFields = {
+  name: "",
+  phone: "",
+  email: "",
+  service: "",
+  city: "",
+  description: "",
+  consent: false,
+};
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+export default function LeadForm({ compact = false }: { compact?: boolean }) {
+  const [form, setForm] = useState<LeadFormFields>(EMPTY_FORM);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [honeypot, setHoneypot] = useState(""); // filled only by bots
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const formLoadedAt = useRef<number>(0);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  // Record when the form page loads
+  useEffect(() => {
+    formLoadedAt.current = Date.now();
+  }, []);
+
+  // Render Turnstile widget once the script loads
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !turnstileRef.current) return;
+
+    function renderWidget() {
+      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
+        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => setTurnstileToken(token),
+        });
+      }
+    }
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      window.onTurnstileLoad = renderWidget;
+    }
+  }, []);
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) {
     const target = e.target;
     if (target instanceof HTMLInputElement && target.type === "checkbox") {
       setForm((prev) => ({ ...prev, [target.name]: target.checked }));
@@ -42,43 +89,52 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
+    setErrorMsg("");
 
     try {
-      const formData = new FormData();
-      formData.append("name", form.name);
-      formData.append("phone", form.phone);
-      formData.append("email", form.email);
-      formData.append("service", form.service);
-      formData.append("cityZip", form.cityZip);
-      formData.append("message", form.message);
-      formData.append("consent", form.consent ? "yes" : "no");
+      const payload = new FormData();
+      payload.append("name", form.name);
+      payload.append("phone", form.phone);
+      payload.append("email", form.email);
+      payload.append("service", form.service);
+      payload.append("city", form.city);
+      payload.append("description", form.description);
+      payload.append("consent", form.consent ? "yes" : "no");
+      payload.append("company_website", honeypot); // honeypot — blank for real users
+      payload.append("formLoadedAt", String(formLoadedAt.current));
+      payload.append("sourcePage", typeof window !== "undefined" ? window.location.href : "");
 
-      if (typeof window !== "undefined") {
-        formData.append("source", window.location.href);
-        formData.append("sourcePage", window.location.pathname);
-        formData.append("landingPage", window.location.href);
-        formData.append("referrer", document.referrer || "direct");
+      if (TURNSTILE_SITE_KEY) {
+        payload.append("turnstileToken", turnstileToken);
       }
 
-      formData.append("timestamp", new Date().toISOString());
-      formData.append("market", `${siteConfig.niche} - ${siteConfig.city}, ${siteConfig.state}`);
-      formData.append("siteName", siteConfig.displayName);
-      if (photo) formData.append("photo", photo);
+      if (photo) {
+        payload.append("photo", photo);
+      }
 
-      const response = await fetch("/api/lead", {
+      const res = await fetch("/api/submit-lead", {
         method: "POST",
-        body: formData,
+        body: payload,
       });
 
-      if (!response.ok) {
-        throw new Error("Lead submission failed");
+      const data = (await res.json()) as { error?: string; success?: boolean };
+
+      if (!res.ok) {
+        setErrorMsg(data.error ?? "Something went wrong. Please try again.");
+        setStatus("error");
+        return;
       }
 
       setStatus("success");
-      setForm({ name: "", phone: "", email: "", service: "", cityZip: "", message: "", consent: false });
+      setForm(EMPTY_FORM);
       setPhoto(null);
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+        setTurnstileToken("");
+      }
     } catch {
       setStatus("error");
+      setErrorMsg(`Something went wrong. Please email us at ${siteConfig.contactEmail}.`);
     }
   }
 
@@ -97,44 +153,70 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
     );
   }
 
-  const gridClass = compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4";
+  const inputClass =
+    "w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className={gridClass}>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
-            Your Name *
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            value={form.name}
-            onChange={handleChange}
-            placeholder="John Smith"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="phone">
-            Phone Number *
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            required
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="(423) 555-0100"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-      </div>
+    <>
+      {/* Load Turnstile script only if site key is configured */}
+      {TURNSTILE_SITE_KEY && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad"
+          strategy="lazyOnload"
+        />
+      )}
 
-      <div className={gridClass}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/*
+          Honeypot field — visually hidden, never filled by real users.
+          Bots that auto-fill all fields will trigger server-side rejection.
+        */}
+        <input
+          type="text"
+          name="company_website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, width: 0 }}
+        />
+
+        {/* Name + Phone */}
+        <div className={compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
+              Your Name *
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              value={form.name}
+              onChange={handleChange}
+              placeholder="John Smith"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="phone">
+              Phone Number *
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="(423) 555-0100"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
             Email Address *
@@ -147,110 +229,125 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
             value={form.email}
             onChange={handleChange}
             placeholder="john@example.com"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
+
+        {/* Service + City */}
+        <div className={compact ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="service">
+              What do you need removed? *
+            </label>
+            <select
+              id="service"
+              name="service"
+              required
+              value={form.service}
+              onChange={handleChange}
+              className={`${inputClass} bg-white`}
+            >
+              <option value="">— Select a service —</option>
+              {siteConfig.services.map((s) => (
+                <option key={s.slug} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
+              <option value="Other / Multiple Items">Other / Multiple Items</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="city">
+              Your City or Zip Code *
+            </label>
+            <input
+              id="city"
+              name="city"
+              type="text"
+              required
+              value={form.city}
+              onChange={handleChange}
+              placeholder="Chattanooga or 37401"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="cityZip">
-            City or Zip Code *
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="description">
+            Describe what you need hauled *
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows={compact ? 2 : 3}
+            required
+            value={form.description}
+            onChange={handleChange}
+            placeholder="e.g. Old couch and mattress in the garage, needs same-day pickup"
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+
+        {/* Photo upload */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
+            Photo (optional)
           </label>
           <input
-            id="cityZip"
-            name="cityZip"
-            type="text"
-            required
-            value={form.cityZip}
-            onChange={handleChange}
-            placeholder="Chattanooga or 37401"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            id="photo"
+            name="photo"
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
           />
+          <p className="text-xs text-gray-400 mt-1">
+            Upload a photo if you can. It helps the pro give a faster, more accurate quote.
+          </p>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="service">
-          What do you need removed? *
+        {/* Consent checkbox */}
+        <label className="flex items-start gap-3 text-xs text-gray-500 leading-relaxed">
+          <input
+            name="consent"
+            type="checkbox"
+            required
+            checked={form.consent}
+            onChange={handleChange}
+            className="mt-1 h-4 w-4 rounded border-gray-300 text-green-700 focus:ring-green-500"
+          />
+          <span>
+            I agree to be contacted about my junk removal request by ChattanoogaJunkRemovalPros.com and/or a local junk removal professional. I understand this is a free referral service and there is no obligation to book.
+          </span>
         </label>
-        <select
-          id="service"
-          name="service"
-          required
-          value={form.service}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+
+        {/* Cloudflare Turnstile widget (rendered only when site key is set) */}
+        {TURNSTILE_SITE_KEY && <div ref={turnstileRef} />}
+
+        {status === "error" && (
+          <p className="text-red-600 text-sm">
+            {errorMsg || `Something went wrong. Please email us at ${siteConfig.contactEmail}.`}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={
+            status === "sending" ||
+            (Boolean(TURNSTILE_SITE_KEY) && !turnstileToken)
+          }
+          className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white font-bold py-4 rounded-full text-lg transition-colors"
         >
-          <option value="">Select a service</option>
-          {siteConfig.services.map((s) => (
-            <option key={s.slug} value={s.name}>
-              {s.name}
-            </option>
-          ))}
-          <option value="Other / Multiple Items">Other / Multiple Items</option>
-        </select>
-      </div>
+          {status === "sending" ? "Sending…" : "Get My Free Quote →"}
+        </button>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="message">
-          Describe what you need hauled
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          rows={compact ? 2 : 3}
-          value={form.message}
-          onChange={handleChange}
-          placeholder="e.g. Old couch and mattress in the garage, second floor, needs pickup this week"
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
-          Photo (optional)
-        </label>
-        <input
-          id="photo"
-          name="photo"
-          type="file"
-          accept="image/*"
-          onChange={handlePhotoChange}
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
-        />
-        <p className="text-xs text-gray-400 mt-1">
-          Upload a photo if you can. It helps the pro give a faster, more accurate quote.
-        </p>
-      </div>
-
-      <label className="flex items-start gap-3 text-xs text-gray-500 leading-relaxed">
-        <input
-          name="consent"
-          type="checkbox"
-          required
-          checked={form.consent}
-          onChange={handleChange}
-          className="mt-1 h-4 w-4 rounded border-gray-300 text-green-700 focus:ring-green-500"
-        />
-        <span>
-          I agree to be contacted about my junk removal request by ChattanoogaJunkRemovalPros.com and/or a local junk removal professional. I understand this is a free referral service and there is no obligation to book.
-        </span>
-      </label>
-
-      {status === "error" && (
-        <p className="text-red-600 text-sm">Something went wrong. Please email us at {siteConfig.contactEmail}.</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white font-bold py-4 rounded-full text-lg transition-colors"
-      >
-        {status === "sending" ? "Sending..." : "Get My Free Quote"}
-      </button>
-
-      <div className="text-xs text-gray-500 space-y-0.5 text-center">
-        <p>Free referral service. No obligation.</p>
-        <p>We are not a junk removal company. The local pro contacts you directly.</p>
-      </div>
-    </form>
+        <div className="text-xs text-gray-500 space-y-0.5 text-center">
+          <p>Free referral service. No obligation.</p>
+          <p>We are not a junk removal company. The local pro contacts you directly.</p>
+        </div>
+      </form>
+    </>
   );
 }
