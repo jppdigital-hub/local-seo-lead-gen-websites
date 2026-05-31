@@ -15,26 +15,29 @@ declare global {
   }
 }
 
-interface FormData {
+interface LeadFormFields {
   name: string;
   phone: string;
   email: string;
   service: string;
   city: string;
   description: string;
+  consent: boolean;
 }
 
-const EMPTY_FORM: FormData = {
+const EMPTY_FORM: LeadFormFields = {
   name: "",
   phone: "",
   email: "",
   service: "",
   city: "",
   description: "",
+  consent: false,
 };
 
 export default function LeadForm({ compact = false }: { compact?: boolean }) {
-  const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [form, setForm] = useState<LeadFormFields>(EMPTY_FORM);
+  const [photo, setPhoto] = useState<File | null>(null);
   const [honeypot, setHoneypot] = useState(""); // filled only by bots
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -71,7 +74,16 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const target = e.target;
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      setForm((prev) => ({ ...prev, [target.name]: target.checked }));
+      return;
+    }
+    setForm((prev) => ({ ...prev, [target.name]: target.value }));
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhoto(e.target.files?.[0] ?? null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,21 +92,29 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
     setErrorMsg("");
 
     try {
-      const payload: Record<string, unknown> = {
-        ...form,
-        company_website: honeypot, // honeypot value — blank for real users
-        formLoadedAt: formLoadedAt.current,
-        sourcePage: typeof window !== "undefined" ? window.location.href : "",
-      };
+      const payload = new FormData();
+      payload.append("name", form.name);
+      payload.append("phone", form.phone);
+      payload.append("email", form.email);
+      payload.append("service", form.service);
+      payload.append("city", form.city);
+      payload.append("description", form.description);
+      payload.append("consent", form.consent ? "yes" : "no");
+      payload.append("company_website", honeypot); // honeypot — blank for real users
+      payload.append("formLoadedAt", String(formLoadedAt.current));
+      payload.append("sourcePage", typeof window !== "undefined" ? window.location.href : "");
 
       if (TURNSTILE_SITE_KEY) {
-        payload.turnstileToken = turnstileToken;
+        payload.append("turnstileToken", turnstileToken);
+      }
+
+      if (photo) {
+        payload.append("photo", photo);
       }
 
       const res = await fetch("/api/submit-lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: payload,
       });
 
       const data = (await res.json()) as { error?: string; success?: boolean };
@@ -107,6 +127,7 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
 
       setStatus("success");
       setForm(EMPTY_FORM);
+      setPhoto(null);
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.reset(widgetIdRef.current);
         setTurnstileToken("");
@@ -268,6 +289,39 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
             className={`${inputClass} resize-none`}
           />
         </div>
+
+        {/* Photo upload */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
+            Photo (optional)
+          </label>
+          <input
+            id="photo"
+            name="photo"
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Upload a photo if you can. It helps the pro give a faster, more accurate quote.
+          </p>
+        </div>
+
+        {/* Consent checkbox */}
+        <label className="flex items-start gap-3 text-xs text-gray-500 leading-relaxed">
+          <input
+            name="consent"
+            type="checkbox"
+            required
+            checked={form.consent}
+            onChange={handleChange}
+            className="mt-1 h-4 w-4 rounded border-gray-300 text-green-700 focus:ring-green-500"
+          />
+          <span>
+            I agree to be contacted about my junk removal request by ChattanoogaJunkRemovalPros.com and/or a local junk removal professional. I understand this is a free referral service and there is no obligation to book.
+          </span>
+        </label>
 
         {/* Cloudflare Turnstile widget (rendered only when site key is set) */}
         {TURNSTILE_SITE_KEY && <div ref={turnstileRef} />}

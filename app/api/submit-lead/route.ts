@@ -102,56 +102,55 @@ function purgeExpiredSubmissions(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface SubmitLeadBody {
-  name?: string;
-  phone?: string;
-  email?: string;
-  service?: string;
-  city?: string;
-  description?: string;
-  company_website?: string; // honeypot
-  formLoadedAt?: number;
-  sourcePage?: string;
-  turnstileToken?: string;
-}
-
-// ---------------------------------------------------------------------------
 // Route Handler
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
-  // Parse body
-  let body: SubmitLeadBody;
+  // Parse multipart form data (supports text fields + optional photo upload)
+  let fd: FormData;
   try {
-    body = (await request.json()) as SubmitLeadBody;
+    fd = await request.formData();
   } catch {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const {
-    name = "",
-    phone = "",
-    email = "",
-    service = "",
-    city = "",
-    description = "",
-    company_website = "",
-    formLoadedAt,
-    sourcePage = "",
-    turnstileToken = "",
-  } = body;
+  const str = (key: string): string => (fd.get(key) as string | null)?.trim() ?? "";
+
+  const name             = str("name");
+  const phone            = str("phone");
+  const email            = str("email");
+  const service          = str("service");
+  const city             = str("city");
+  const description      = str("description");
+  const company_website  = str("company_website"); // honeypot
+  const sourcePage       = str("sourcePage");
+  const turnstileToken   = str("turnstileToken");
+  const consent          = str("consent") === "yes";
+  const formLoadedAtRaw  = str("formLoadedAt");
+  const formLoadedAt     = formLoadedAtRaw ? Number(formLoadedAtRaw) : undefined;
+
+  // Detect photo without reading binary into memory
+  const photoEntry = fd.get("photo");
+  const hasPhoto   = photoEntry instanceof File && photoEntry.size > 0;
 
   const submittedAt = new Date().toISOString();
   const spamReasons: string[] = [];
   let spamScore = 0;
 
   // ---------------------------------------------------------------------------
+  // Consent check (hard reject — required field)
+  // ---------------------------------------------------------------------------
+  if (!consent) {
+    return Response.json(
+      { error: "You must agree to be contacted to submit this form." },
+      { status: 400 }
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Cloudflare Turnstile (skip if keys not configured)
   // ---------------------------------------------------------------------------
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const turnstileSiteKey   = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
 
   if (turnstileSiteKey && turnstileSecretKey) {
@@ -192,7 +191,7 @@ export async function POST(request: NextRequest) {
   // ---------------------------------------------------------------------------
   // Honeypot check
   // ---------------------------------------------------------------------------
-  const honeypotTriggered = company_website.trim().length > 0;
+  const honeypotTriggered = company_website.length > 0;
   if (honeypotTriggered) {
     spamScore += 10;
     spamReasons.push("honeypot_triggered");
@@ -214,18 +213,16 @@ export async function POST(request: NextRequest) {
   // Required field validation (hard reject on missing)
   // ---------------------------------------------------------------------------
   const missingFields: string[] = [];
-  if (!name.trim()) missingFields.push("name");
-  if (!phone.trim()) missingFields.push("phone");
-  if (!email.trim()) missingFields.push("email");
-  if (!service.trim()) missingFields.push("service");
-  if (!city.trim()) missingFields.push("city");
-  if (!description.trim()) missingFields.push("description");
+  if (!name)        missingFields.push("name");
+  if (!phone)       missingFields.push("phone");
+  if (!email)       missingFields.push("email");
+  if (!service)     missingFields.push("service");
+  if (!city)        missingFields.push("city");
+  if (!description) missingFields.push("description");
 
   if (missingFields.length > 0) {
     return Response.json(
-      {
-        error: `Please complete all required fields: ${missingFields.join(", ")}`,
-      },
+      { error: `Please complete all required fields: ${missingFields.join(", ")}` },
       { status: 400 }
     );
   }
@@ -264,15 +261,15 @@ export async function POST(request: NextRequest) {
   // ---------------------------------------------------------------------------
   // Service area validation
   // ---------------------------------------------------------------------------
-  const cityLower = city.trim().toLowerCase();
-  const zipMatch = city.trim().match(/\b(\d{5})\b/);
+  const cityLower = city.toLowerCase();
+  const zipMatch  = city.match(/\b(\d{5})\b/);
   const serviceAreaValid =
     VALID_AREA_NAMES.some((area) => cityLower.includes(area)) ||
     (zipMatch !== null && VALID_ZIPS.has(zipMatch[1]));
 
   if (!serviceAreaValid) {
     spamScore += 3;
-    spamReasons.push(`service_area_invalid: ${city.trim()}`);
+    spamReasons.push(`service_area_invalid: ${city}`);
   }
 
   // ---------------------------------------------------------------------------
@@ -293,7 +290,7 @@ export async function POST(request: NextRequest) {
   // ---------------------------------------------------------------------------
   // Description length check
   // ---------------------------------------------------------------------------
-  if (description.trim().length < 15) {
+  if (description.length < 15) {
     spamScore += 2;
     spamReasons.push("description_too_short");
   }
@@ -302,8 +299,8 @@ export async function POST(request: NextRequest) {
   // Duplicate detection (same phone or email within 60 minutes)
   // ---------------------------------------------------------------------------
   purgeExpiredSubmissions();
-  const emailKey = `email:${email.toLowerCase().trim()}`;
-  const phoneKey = `phone:${digitsOnly}`;
+  const emailKey  = `email:${email.toLowerCase()}`;
+  const phoneKey  = `phone:${digitsOnly}`;
   const isDuplicate =
     recentSubmissions.has(emailKey) || recentSubmissions.has(phoneKey);
 
@@ -323,20 +320,22 @@ export async function POST(request: NextRequest) {
     spamScore <= 2 &&
     serviceAreaValid &&
     !honeypotTriggered &&
-    name.trim().length > 0 &&
-    phone.trim().length > 0;
+    name.length > 0 &&
+    phone.length > 0;
 
   // ---------------------------------------------------------------------------
   // Build and send payload to Make webhook
+  // Photo is not forwarded as binary — hasPhoto flag is included instead.
   // ---------------------------------------------------------------------------
   const payload = {
-    name: name.trim(),
-    phone: phone.trim(),
-    email: email.trim(),
-    service: service.trim(),
-    city: city.trim(),
-    description: description.trim(),
+    name,
+    phone,
+    email,
+    service,
+    city,
+    description,
     sourcePage,
+    hasPhoto,
     leadType: "Form",
     spamScore,
     spamReasons,
