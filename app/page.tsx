@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
-import { faqSchema } from "@/lib/schema";
+import { faqSchema, breadcrumbSchema } from "@/lib/schema";
 import LeadForm from "@/components/LeadForm";
 
 export const metadata: Metadata = {
@@ -16,6 +16,10 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema([{ name: "Home", url: "/" }])) }}
       />
 
       {/* ── Hero ── */}
@@ -50,7 +54,7 @@ export default function HomePage() {
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-gray-900">
             <h2 className="text-xl font-bold mb-1 text-gray-900">Get a Free Quote</h2>
             <p className="text-sm text-gray-500 mb-5">
-              A local pro will contact you — usually within 1 hour.
+              A local pro will contact you with a free quote.
             </p>
             <LeadForm compact />
           </div>
@@ -96,14 +100,16 @@ export default function HomePage() {
             </p>
             <h2>What Does Junk Removal Cost in Chattanooga?</h2>
             <p>
-              Most junk removal in Chattanooga is priced by the truckload or fraction thereof. Here&apos;s a rough guide to what you can expect:
+              Most junk removal in Chattanooga is priced by the truckload or fraction thereof. Here is what you can expect:
             </p>
             <ul>
-              <li><strong>Single item (one sofa, one appliance):</strong> $75 – $125</li>
-              <li><strong>Quarter truckload (a few items, small pile):</strong> $100 – $175</li>
-              <li><strong>Half truckload (medium cleanout or 6–8 items):</strong> $175 – $275</li>
-              <li><strong>Full truckload (large cleanout, renovation debris):</strong> $300 – $500</li>
-              <li><strong>Estate cleanout or specialty items (hot tubs, pianos):</strong> Quoted individually</li>
+              <li><strong>Minimum load / single item (1 to 2 cubic yards):</strong> $95 to $125</li>
+              <li><strong>Quarter truckload (80 to 120 cubic feet):</strong> approximately $144</li>
+              <li><strong>Half truckload (180 to 240 cubic feet):</strong> approximately $287</li>
+              <li><strong>Three-quarter truckload (300 to 360 cubic feet):</strong> approximately $414</li>
+              <li><strong>Full truckload (420 to 480 cubic feet):</strong> approximately $591</li>
+              <li><strong>Estate cleanouts (full property):</strong> typically $1,200 to $2,000+</li>
+              <li><strong>Specialty items (hot tubs, pianos, sheds):</strong> quoted individually</li>
             </ul>
             <p>
               Prices vary based on the type of material, ease of access, and whether any items require special disposal (appliances with refrigerants, electronics with e-waste fees, etc.). All quotes from pros in our network are free and given before any work begins.
@@ -187,8 +193,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FAQ ── */}
+      {/* ── Resource guides ── */}
       <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-2">Local Junk Removal Guides</h2>
+          <p className="text-center text-gray-500 mb-8 max-w-2xl mx-auto">
+            Know your disposal options before you call. These guides cover city rules, pricing, recycling, and donation options specific to Chattanooga.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { href: "/resources/junk-removal-cost-chattanooga", title: "2026 Cost Guide", desc: "Real pricing data from Chattanooga operators." },
+              { href: "/resources/city-pickup-vs-junk-removal", title: "City Pickup vs. Private Hauler", desc: "When city services work — and when they don't." },
+              { href: "/resources/landlord-junk-removal-chattanooga", title: "Junk Removal for Landlords", desc: "City bulk pickup is off-limits for landlords. Here's why." },
+              { href: "/resources/donate-furniture-chattanooga", title: "Where to Donate Furniture", desc: "Habitat ReStore, Samaritan Center, Salvation Army." },
+              { href: "/resources/mattress-disposal-chattanooga", title: "Mattress Disposal Options", desc: "City pickup, centers, or private hauler." },
+              { href: "/resources/appliance-removal-guide", title: "Appliance Removal Guide", desc: "EPA refrigerant rules and why appliances cost more." },
+              { href: "/resources/electronics-disposal-chattanooga", title: "Electronics Disposal", desc: "What each county recycling center accepts and refuses." },
+              { href: "/resources/chattanooga-refuse-centers-guide", title: "Refuse Centers Guide", desc: "Locations, hours, eligibility, and restrictions." },
+            ].map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="bg-white rounded-xl p-5 border border-gray-200 hover:border-green-400 hover:shadow-sm transition-all group"
+              >
+                <h3 className="font-bold text-gray-900 mb-1 group-hover:text-green-700 transition-colors text-sm">
+                  {guide.title}
+                </h3>
+                <p className="text-gray-500 text-xs leading-relaxed">{guide.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10">
             Frequently Asked Questions
@@ -213,12 +252,12 @@ export default function HomePage() {
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="bg-green-700 text-white py-16 px-4 text-center">
+      <section className="bg-green-700 text-white py-16 px-4 text-center" id="quote">
         <h2 className="text-3xl font-bold mb-3">
           Ready to Clear the Clutter?
         </h2>
         <p className="text-green-100 mb-6 max-w-xl mx-auto">
-          Submit your job details and we&apos;ll connect you with a local Chattanooga junk removal pro — free, no obligation.
+          Submit your job details and we&apos;ll connect you with a local Chattanooga junk removal pro. Free, no obligation.
         </p>
         <Link
           href="/contact"

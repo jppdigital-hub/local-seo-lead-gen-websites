@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
-import { localBusinessSchema } from "@/lib/schema";
+import { organizationSchema, websiteSchema, referralServiceSchema } from "@/lib/schema";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TextNormalizer from "@/components/TextNormalizer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -56,11 +57,24 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(localBusinessSchema()),
+            __html: JSON.stringify(organizationSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(referralServiceSchema()),
           }}
         />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+        <TextNormalizer />
         <Header />
         <main>{children}</main>
         <Footer />

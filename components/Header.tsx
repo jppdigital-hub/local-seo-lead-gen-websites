@@ -15,8 +15,8 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/services/furniture-removal" className="hover:text-green-200 transition-colors">Services</Link>
-          <Link href="/areas/hixson" className="hover:text-green-200 transition-colors">Areas Served</Link>
+          <Link href="/services" className="hover:text-green-200 transition-colors">Services</Link>
+          <Link href="/areas" className="hover:text-green-200 transition-colors">Areas Served</Link>
           <Link href="/about" className="hover:text-green-200 transition-colors">How It Works</Link>
           <Link
             href="/contact"
@@ -41,8 +41,8 @@ export default function Header() {
       {/* Mobile menu */}
       {open && (
         <div className="md:hidden bg-green-800 px-4 pb-4 flex flex-col gap-3 text-sm font-medium">
-          <Link href="/services/furniture-removal" className="py-2 border-b border-green-700" onClick={() => setOpen(false)}>Services</Link>
-          <Link href="/areas/hixson" className="py-2 border-b border-green-700" onClick={() => setOpen(false)}>Areas Served</Link>
+          <Link href="/services" className="py-2 border-b border-green-700" onClick={() => setOpen(false)}>Services</Link>
+          <Link href="/areas" className="py-2 border-b border-green-700" onClick={() => setOpen(false)}>Areas Served</Link>
           <Link href="/about" className="py-2 border-b border-green-700" onClick={() => setOpen(false)}>How It Works</Link>
           <Link href="/contact" className="bg-yellow-400 text-gray-900 font-bold text-center py-2 rounded-full" onClick={() => setOpen(false)}>
             Get a Free Quote

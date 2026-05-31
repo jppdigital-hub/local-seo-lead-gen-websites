@@ -4,7 +4,7 @@ import LeadForm from "@/components/LeadForm";
 
 export const metadata: Metadata = {
   title: `Get a Free Junk Removal Quote in ${siteConfig.city} | ${siteConfig.displayName}`,
-  description: `Submit your junk removal job in ${siteConfig.city}, ${siteConfig.state}. A local licensed pro will contact you with a free quote — usually within 1 hour. No obligation.`,
+  description: `Submit your junk removal job in ${siteConfig.city}, ${siteConfig.state}. A local licensed pro will contact you with a free quote. No obligation.`,
   alternates: { canonical: "/contact" },
 };
 
@@ -18,7 +18,7 @@ export default function ContactPage() {
             Get a Free Junk Removal Quote in {siteConfig.city}
           </h1>
           <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-            Describe your job and we&apos;ll connect you with a licensed, insured local junk removal professional in {siteConfig.county}. They&apos;ll contact you directly — usually within an hour — with a free, no-obligation quote.
+            Describe your job and we&apos;ll connect you with a licensed, insured local junk removal professional in {siteConfig.county}. They will contact you directly with a free, no-obligation quote.
           </p>
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8 text-sm text-yellow-900">
@@ -49,7 +49,7 @@ export default function ContactPage() {
               <div>
                 <div className="font-semibold text-gray-800">Response Time</div>
                 <p className="text-gray-600 text-sm">
-                  A local pro typically contacts you within 1 hour during business hours (Mon–Sat, 7am–6pm).
+                  A local pro will contact you during business hours (Mon–Sat, 7am–6pm).
                 </p>
               </div>
             </div>

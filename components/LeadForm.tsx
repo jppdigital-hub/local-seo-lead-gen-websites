@@ -123,10 +123,11 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
         <div className="text-4xl mb-3">✅</div>
         <h3 className="text-xl font-bold text-green-800 mb-2">Request received!</h3>
         <p className="text-green-700 leading-relaxed">
-          A local junk removal pro serving {siteConfig.city} will contact you
-          directly — usually within 1 hour during business hours — with a free quote.
+          Your request has been received. A local junk removal pro will be in touch with a free quote.
         </p>
-        <p className="text-green-600 text-sm mt-3">No obligation until you agree to a price.</p>
+        <p className="text-green-600 text-sm mt-3">
+          No obligation until you agree to a price. The pro performs the work. We charge nothing for the connection.
+        </p>
       </div>
     );
   }
@@ -288,9 +289,10 @@ export default function LeadForm({ compact = false }: { compact?: boolean }) {
           {status === "sending" ? "Sending…" : "Get My Free Quote →"}
         </button>
 
-        <p className="text-xs text-gray-500 text-center">
-          No obligation. We typically respond within 1 hour.
-        </p>
+        <div className="text-xs text-gray-500 space-y-0.5 text-center">
+          <p>Free referral service. No obligation.</p>
+          <p>We are not a junk removal company. The local pro contacts you directly.</p>
+        </div>
       </form>
     </>
   );
